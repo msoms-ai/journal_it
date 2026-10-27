@@ -1,12 +1,21 @@
 {
   "name": "journal_it",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "Journal It (صَحِّف) - AI Newsroom Editorial Studio",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "npm --prefix apps/web run build",
+    "start": "npm --prefix apps/web start",
+    "install:web": "npm --prefix apps/web install",
+    "test": "echo \"OK\""
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC"
+  "keywords": [
+    "journalism",
+    "newsroom",
+    "editorial",
+    "ai",
+    "gemini",
+    "transcription"
+  ],
+  "author": "msoms-ai",
+  "license": "GPL-3.0"
 }
