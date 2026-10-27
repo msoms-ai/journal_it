@@ -1,0 +1,21 @@
+{
+  "name": "صَحِّف | Journal it",
+  "short_name": "صَحِّف",
+  "description": "منصة التحرير الإخباري الذكية",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#FBF9F5",
+  "theme_color": "#8B0000",
+  "icons": [
+    {
+      "src": "/assets/journal_it_logo.jpg",
+      "sizes": "192x192",
+      "type": "image/jpeg"
+    },
+    {
+      "src": "/assets/journal_it_logo.jpg",
+      "sizes": "512x512",
+      "type": "image/jpeg"
+    }
+  ]
+}
