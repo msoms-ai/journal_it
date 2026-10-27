@@ -4,7 +4,7 @@
   "description": "صَحِّف | Journal It - AI Newsroom Editorial Studio by msoms.ai",
   "scripts": {
     "dev": "next dev -p 3000",
-    "build": "next build",
+    "build": "node bin-build.js",
     "start": "node server.js",
     "lint": "next lint"
   },
