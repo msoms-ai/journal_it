@@ -15,7 +15,6 @@ import {
   Square,
   FileText,
   Printer,
-  Download,
   Plus,
   Check,
   RefreshCw,
@@ -24,7 +23,7 @@ import {
   ArrowLeft,
   AlertCircle
 } from 'lucide-react';
-import { transcribeMediaFile, synthesizeUaeReport, exportDocx } from '../lib/api';
+import { transcribeMediaFile, synthesizeUaeReport } from '../lib/api';
 
 interface UploadedFileItem {
   id: string;
@@ -55,7 +54,6 @@ export default function HomePage() {
 
   // Generated Report State
   const [report, setReport] = useState<any>(null);
-  const [isExportingDocx, setIsExportingDocx] = useState<boolean>(false);
   const [isSynthesizingReport, setIsSynthesizingReport] = useState<boolean>(false);
 
   const fileInputRef = useRef<HTMLInputElement | null>(null);
@@ -282,23 +280,6 @@ export default function HomePage() {
 
     await navigator.clipboard.writeText(fullText);
     showToast(t.copiedToast);
-  };
-
-  const handleDownloadDocx = async () => {
-    if (!report) return;
-    setIsExportingDocx(true);
-    showToast(isArabic ? 'جاري إعداد وتحميل ملف Word...' : 'Generating Word document...');
-    const success = await exportDocx({
-      report_text: report.report_text || report.body_markdown || '',
-      body_markdown: report.body_markdown || report.report_text || '',
-      language: locale,
-    });
-    setIsExportingDocx(false);
-    if (success) {
-      showToast(isArabic ? 'تم تحميل ملف Word بنجاح' : 'Word document downloaded successfully');
-    } else {
-      showToast(isArabic ? 'حدث خطأ أثناء تحميل ملف Word' : 'Failed to download Word document');
-    }
   };
 
   return (
@@ -628,15 +609,6 @@ export default function HomePage() {
                 >
                   <Copy className="w-4 h-4" />
                   <span>{t.copyReport}</span>
-                </button>
-
-                <button
-                  onClick={handleDownloadDocx}
-                  disabled={isExportingDocx}
-                  className="px-4 py-2.5 rounded-xl bg-subtle hover:bg-surface border border-editorial-rule text-ink-primary font-bold text-xs sm:text-sm flex items-center gap-2"
-                >
-                  <Download className="w-4 h-4 text-editorial-crimson" />
-                  <span>{isExportingDocx ? '...' : t.downloadDocx}</span>
                 </button>
 
                 <button
