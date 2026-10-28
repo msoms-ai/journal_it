@@ -28,29 +28,20 @@ export default function InstallPrompt({ locale }: InstallPromptProps) {
     setIsStandalone(isStandaloneMode);
     if (isStandaloneMode) return;
 
-    // 2. Check dismissal cooldown (dismissed within last 2 days)
-    const dismissedAt = localStorage.getItem('sahhef_install_dismissed');
-    if (dismissedAt) {
-      const elapsed = Date.now() - parseInt(dismissedAt, 10);
-      if (elapsed < 2 * 24 * 60 * 60 * 1000) {
-        return;
-      }
-    }
-
-    // 3. Detect device
+    // 2. Detect device
     const ua = window.navigator.userAgent.toLowerCase();
     const isIosDevice = /iphone|ipad|ipod/.test(ua) && !(window as any).MSStream;
     const isMobile = /android|iphone|ipad|ipod|mobile|blackberry|iemobile|opera mini/i.test(ua);
 
     setIsIOS(isIosDevice);
 
-    // 4. Check if prompt was already captured by early script
+    // 3. Check if prompt was already captured by early script
     if ((window as any).deferredInstallPrompt) {
       setDeferredPrompt((window as any).deferredInstallPrompt);
       setShowPrompt(true);
     }
 
-    // 5. Handlers for prompt capture
+    // 4. Handlers for prompt capture
     const handleBeforeInstallPrompt = (e: Event) => {
       e.preventDefault();
       setDeferredPrompt(e);
@@ -65,19 +56,35 @@ export default function InstallPrompt({ locale }: InstallPromptProps) {
       }
     };
 
+    const handleManualOpen = () => {
+      setShowPrompt(true);
+    };
+
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
     window.addEventListener('pwa-prompt-ready', handlePromptReady);
+    window.addEventListener('open-install-prompt', handleManualOpen);
 
-    // 6. On mobile browsers, show banner after short delay
+    // 5. Check dismissal cooldown (only for auto-showing, not blocking manual)
+    const dismissedAt = sessionStorage.getItem('sahhef_install_dismissed') || localStorage.getItem('sahhef_install_dismissed');
+    let isRecentlyDismissed = false;
+    if (dismissedAt) {
+      const elapsed = Date.now() - parseInt(dismissedAt, 10);
+      if (elapsed < 60 * 60 * 1000) { // 1 hour cooldown instead of 48 hours
+        isRecentlyDismissed = true;
+      }
+    }
+
+    // 6. On mobile browsers, show banner after short delay if not recently dismissed
     const timer = setTimeout(() => {
-      if (isMobile && !isStandaloneMode) {
+      if (isMobile && !isStandaloneMode && !isRecentlyDismissed) {
         setShowPrompt(true);
       }
-    }, 2000);
+    }, 1500);
 
     return () => {
       window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
       window.removeEventListener('pwa-prompt-ready', handlePromptReady);
+      window.removeEventListener('open-install-prompt', handleManualOpen);
       clearTimeout(timer);
     };
   }, []);
@@ -105,7 +112,8 @@ export default function InstallPrompt({ locale }: InstallPromptProps) {
 
   const handleDismiss = () => {
     setShowPrompt(false);
-    localStorage.setItem('sahhef_install_dismissed', Date.now().toString());
+    sessionStorage.setItem('sahhef_install_dismissed', Date.now().toString());
+    localStorage.removeItem('sahhef_install_dismissed');
   };
 
   if (!showPrompt || isStandalone) {

@@ -11,6 +11,7 @@
   "theme_color": "#8B0000",
   "lang": "ar",
   "dir": "rtl",
+  "prefer_related_applications": false,
   "categories": ["productivity", "news"],
   "icons": [
     {
