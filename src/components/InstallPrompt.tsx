@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
-import { Download, Share2, PlusSquare, X } from 'lucide-react';
+import { Download, Share2, PlusSquare, MoreVertical, X } from 'lucide-react';
 import { Locale, translations } from '../lib/translations';
 
 interface InstallPromptProps {
@@ -14,10 +14,9 @@ export default function InstallPrompt({ locale }: InstallPromptProps) {
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
   const [isIOS, setIsIOS] = useState(false);
   const [isStandalone, setIsStandalone] = useState(false);
-  const [showIosGuide, setShowIosGuide] = useState(false);
+  const [showGuide, setShowGuide] = useState(false);
 
   const t = translations[locale];
-  const isArabic = locale === 'ar';
 
   useEffect(() => {
     // 1. Check if already running in standalone / PWA mode
@@ -29,11 +28,11 @@ export default function InstallPrompt({ locale }: InstallPromptProps) {
     setIsStandalone(isStandaloneMode);
     if (isStandaloneMode) return;
 
-    // 2. Check dismissal cooldown (dismissed within last 3 days)
+    // 2. Check dismissal cooldown (dismissed within last 2 days)
     const dismissedAt = localStorage.getItem('sahhef_install_dismissed');
     if (dismissedAt) {
       const elapsed = Date.now() - parseInt(dismissedAt, 10);
-      if (elapsed < 3 * 24 * 60 * 60 * 1000) {
+      if (elapsed < 2 * 24 * 60 * 60 * 1000) {
         return;
       }
     }
@@ -45,51 +44,62 @@ export default function InstallPrompt({ locale }: InstallPromptProps) {
 
     setIsIOS(isIosDevice);
 
-    // 4. Capture native beforeinstallprompt (Android Chrome / Edge / etc.)
+    // 4. Check if prompt was already captured by early script
+    if ((window as any).deferredInstallPrompt) {
+      setDeferredPrompt((window as any).deferredInstallPrompt);
+      setShowPrompt(true);
+    }
+
+    // 5. Handlers for prompt capture
     const handleBeforeInstallPrompt = (e: Event) => {
       e.preventDefault();
       setDeferredPrompt(e);
+      (window as any).deferredInstallPrompt = e;
       setShowPrompt(true);
     };
 
-    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    const handlePromptReady = () => {
+      if ((window as any).deferredInstallPrompt) {
+        setDeferredPrompt((window as any).deferredInstallPrompt);
+        setShowPrompt(true);
+      }
+    };
 
-    // 5. On iOS or mobile without beforeinstallprompt, show the prompt after a short delay
+    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    window.addEventListener('pwa-prompt-ready', handlePromptReady);
+
+    // 6. On mobile browsers, show banner after short delay
     const timer = setTimeout(() => {
       if (isMobile && !isStandaloneMode) {
         setShowPrompt(true);
       }
-    }, 2500);
+    }, 2000);
 
     return () => {
       window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+      window.removeEventListener('pwa-prompt-ready', handlePromptReady);
       clearTimeout(timer);
     };
   }, []);
 
   const handleInstallClick = async () => {
-    if (deferredPrompt) {
-      // Trigger native Android install prompt
+    const promptObj = deferredPrompt || (window as any).deferredInstallPrompt;
+
+    if (promptObj) {
       try {
-        deferredPrompt.prompt();
-        const { outcome } = await deferredPrompt.userChoice;
-        if (outcome === 'accepted') {
+        await promptObj.prompt();
+        const choice = await promptObj.userChoice;
+        if (choice && choice.outcome === 'accepted') {
           setShowPrompt(false);
         }
       } catch (err) {
-        console.error('Install prompt error:', err);
+        console.error('Install prompt trigger error:', err);
       }
       setDeferredPrompt(null);
-    } else if (isIOS) {
-      // Toggle iOS visual instructions
-      setShowIosGuide(true);
+      (window as any).deferredInstallPrompt = null;
     } else {
-      // Fallback for browsers that don't support automated prompt
-      alert(
-        isArabic
-          ? 'لإضافة التطبيق، افتح قائمة خيارات المتصفح (⋮) واختر "إضافة إلى الشاشة الرئيسية".'
-          : 'To add the app, open your browser menu (⋮) and select "Add to Home Screen".'
-      );
+      // Toggle manual instructions guide smoothly without intrusive alert
+      setShowGuide((prev) => !prev);
     }
   };
 
@@ -107,7 +117,7 @@ export default function InstallPrompt({ locale }: InstallPromptProps) {
       <div className="bg-surface/95 backdrop-blur-md border-2 border-editorial-rule shadow-2xl rounded-2xl p-4 sm:p-5 text-ink-primary">
         {/* Header row: Logo, Titles, and Close Button */}
         <div className="flex items-start gap-3">
-          {/* Platform Icon */}
+          {/* Platform Official Icon */}
           <div className="relative w-12 h-12 rounded-xl overflow-hidden border-2 border-editorial-crimson/30 shadow-xs flex-shrink-0 bg-white">
             <Image
               src="/icons/icon-192.png"
@@ -126,6 +136,7 @@ export default function InstallPrompt({ locale }: InstallPromptProps) {
                 {t.installTitle}
               </h4>
               <button
+                type="button"
                 onClick={handleDismiss}
                 className="text-ink-secondary hover:text-editorial-crimson p-1 rounded-lg transition-colors flex-shrink-0"
                 aria-label="Close"
@@ -139,23 +150,44 @@ export default function InstallPrompt({ locale }: InstallPromptProps) {
           </div>
         </div>
 
-        {/* iOS Step-by-Step Guide Dropdown */}
-        {showIosGuide && isIOS && (
-          <div className="mt-3 p-3 bg-subtle/80 rounded-xl border border-editorial-rule text-xs space-y-2 animate-fadeIn">
-            <div className="flex items-center gap-2 text-ink-primary font-medium">
-              <span className="w-5 h-5 rounded-full bg-editorial-crimson text-white flex items-center justify-center font-bold text-[10px] flex-shrink-0">
-                1
-              </span>
-              <span>{t.installIosStep1}</span>
-              <Share2 className="w-3.5 h-3.5 text-editorial-crimson inline" />
-            </div>
-            <div className="flex items-center gap-2 text-ink-primary font-medium">
-              <span className="w-5 h-5 rounded-full bg-editorial-crimson text-white flex items-center justify-center font-bold text-[10px] flex-shrink-0">
-                2
-              </span>
-              <span>{t.installIosStep2}</span>
-              <PlusSquare className="w-3.5 h-3.5 text-editorial-navy inline" />
-            </div>
+        {/* Step-by-Step Visual Guide for iOS or Manual Browser Menu */}
+        {showGuide && (
+          <div className="mt-3 p-3 bg-subtle/90 rounded-xl border border-editorial-rule text-xs space-y-2 animate-fadeIn">
+            {isIOS ? (
+              <>
+                <div className="flex items-center gap-2 text-ink-primary font-medium">
+                  <span className="w-5 h-5 rounded-full bg-editorial-crimson text-white flex items-center justify-center font-bold text-[10px] flex-shrink-0">
+                    1
+                  </span>
+                  <span>{t.installIosStep1}</span>
+                  <Share2 className="w-3.5 h-3.5 text-editorial-crimson inline" />
+                </div>
+                <div className="flex items-center gap-2 text-ink-primary font-medium">
+                  <span className="w-5 h-5 rounded-full bg-editorial-crimson text-white flex items-center justify-center font-bold text-[10px] flex-shrink-0">
+                    2
+                  </span>
+                  <span>{t.installIosStep2}</span>
+                  <PlusSquare className="w-3.5 h-3.5 text-editorial-navy inline" />
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="flex items-center gap-2 text-ink-primary font-medium">
+                  <span className="w-5 h-5 rounded-full bg-editorial-crimson text-white flex items-center justify-center font-bold text-[10px] flex-shrink-0">
+                    1
+                  </span>
+                  <span>{t.installAndroidStep1}</span>
+                  <MoreVertical className="w-3.5 h-3.5 text-editorial-crimson inline" />
+                </div>
+                <div className="flex items-center gap-2 text-ink-primary font-medium">
+                  <span className="w-5 h-5 rounded-full bg-editorial-crimson text-white flex items-center justify-center font-bold text-[10px] flex-shrink-0">
+                    2
+                  </span>
+                  <span>{t.installAndroidStep2}</span>
+                  <Download className="w-3.5 h-3.5 text-editorial-navy inline" />
+                </div>
+              </>
+            )}
           </div>
         )}
 
@@ -172,7 +204,7 @@ export default function InstallPrompt({ locale }: InstallPromptProps) {
           <button
             type="button"
             onClick={handleInstallClick}
-            className="px-4 py-2 rounded-xl bg-editorial-crimson hover:opacity-95 text-white font-bold text-xs sm:text-sm shadow-xs flex items-center gap-1.5 transition-transform active:scale-95"
+            className="px-4 py-2 rounded-xl bg-editorial-crimson hover:opacity-95 text-white font-bold text-xs sm:text-sm shadow-xs flex items-center gap-1.5 transition-transform active:scale-95 cursor-pointer"
           >
             <Download className="w-3.5 h-3.5" />
             <span>{t.installBtn}</span>

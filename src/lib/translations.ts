@@ -58,11 +58,13 @@ export const translations = {
 
     // PWA Install Prompt
     installTitle: "أضف تطبيق «صَحِّف» إلى شاشة هاتفك",
-    installSubtitle: "للوصول السريع وتجربة تحرير صحفية متكاملة بلمسة واحدة",
+    installSubtitle: "للوصول السريع وتجربة تحرير صحفية متكاملة بلمسة واحدة بالأيقونة الرسمية",
     installBtn: "إضافة إلى الشاشة الرئيسية",
     installNotNow: "ليس الآن",
-    installIosStep1: "اضغط على أيقونة المشاركة",
+    installIosStep1: "اضغط على أيقونة المشاركة بالأسفل",
     installIosStep2: "ثم اختر «إضافة إلى الشاشة الرئيسية»",
+    installAndroidStep1: "اضغط على قائمة الخيارات (⋮) أعلى المتصفح",
+    installAndroidStep2: "اختر «تثبيت التطبيق» (أو «إضافة إلى الشاشة الرئيسية»)",
   },
   en: {
     appName: "Journal it",
@@ -121,10 +123,12 @@ export const translations = {
 
     // PWA Install Prompt
     installTitle: 'Add "Journal it" to your Home Screen',
-    installSubtitle: "Quick one-tap access and seamless newsroom experience on your phone",
+    installSubtitle: "Quick one-tap access and seamless newsroom experience with official app icon",
     installBtn: "Add to Home Screen",
     installNotNow: "Not now",
-    installIosStep1: "Tap the Share button",
+    installIosStep1: "Tap the Share icon at the bottom",
     installIosStep2: 'Then select "Add to Home Screen"',
+    installAndroidStep1: "Tap the browser menu (⋮) at top right",
+    installAndroidStep2: 'Select "Install app" (or "Add to Home Screen")',
   }
 };
