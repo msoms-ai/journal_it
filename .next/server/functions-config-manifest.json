@@ -1,1 +1,1 @@
-{"version":1,"functions":{"/api/transcribe":{"maxDuration":180},"/api/synthesize-report":{"maxDuration":120}}}
+{"version":1,"functions":{"/api/synthesize-report":{"maxDuration":120},"/api/transcribe":{"maxDuration":180}}}
