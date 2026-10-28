@@ -10,6 +10,9 @@ npm-debug.log*
 yarn-debug.log*
 .pnpm-debug.log*
 
+# Next.js Cache (keep build outputs, ignore cache)
+.next/cache/
+
 # Database & Temp
 *.db
 *.sqlite

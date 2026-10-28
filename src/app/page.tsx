@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Header } from '../components/Header';
 import { Footer } from '../components/Footer';
+import InstallPrompt from '../components/InstallPrompt';
 import { Locale, translations } from '../lib/translations';
 import {
   Upload,
@@ -668,6 +669,9 @@ export default function HomePage() {
 
       {/* Footer with Selected Model name */}
       <Footer locale={locale} />
+
+      {/* Mobile Add to Home Screen Prompt */}
+      <InstallPrompt locale={locale} />
 
       {/* Toast Notification */}
       {toastMessage && (

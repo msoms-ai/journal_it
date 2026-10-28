@@ -55,6 +55,14 @@ export const translations = {
     // Settings
     lightMode: "فاتح",
     darkMode: "داكن",
+
+    // PWA Install Prompt
+    installTitle: "أضف تطبيق «صَحِّف» إلى شاشة هاتفك",
+    installSubtitle: "للوصول السريع وتجربة تحرير صحفية متكاملة بلمسة واحدة",
+    installBtn: "إضافة إلى الشاشة الرئيسية",
+    installNotNow: "ليس الآن",
+    installIosStep1: "اضغط على أيقونة المشاركة",
+    installIosStep2: "ثم اختر «إضافة إلى الشاشة الرئيسية»",
   },
   en: {
     appName: "Journal it",
@@ -110,5 +118,13 @@ export const translations = {
     // Settings
     lightMode: "Light",
     darkMode: "Dark",
+
+    // PWA Install Prompt
+    installTitle: 'Add "Journal it" to your Home Screen',
+    installSubtitle: "Quick one-tap access and seamless newsroom experience on your phone",
+    installBtn: "Add to Home Screen",
+    installNotNow: "Not now",
+    installIosStep1: "Tap the Share button",
+    installIosStep2: 'Then select "Add to Home Screen"',
   }
 };
