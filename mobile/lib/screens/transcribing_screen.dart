@@ -90,10 +90,11 @@ class _TranscribingScreenState extends State<TranscribingScreen> {
   Widget build(BuildContext context) {
     final t = widget.isArabic;
     final total = widget.files.length;
-    final progress = total > 0 ? (_currentIndex / total) : 0.0;
 
-    return WillPopScope(
-      onWillPop: () async {
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) async {
+        if (didPop) return;
         final leave = await showDialog<bool>(
           context: context,
           builder: (ctx) => AlertDialog(
@@ -118,7 +119,9 @@ class _TranscribingScreenState extends State<TranscribingScreen> {
             ],
           ),
         );
-        return leave ?? false;
+        if (leave == true && context.mounted) {
+          Navigator.of(context).pop();
+        }
       },
       child: Scaffold(
         body: SafeArea(
@@ -135,10 +138,10 @@ class _TranscribingScreenState extends State<TranscribingScreen> {
                   width: 90,
                   height: 90,
                   decoration: BoxDecoration(
-                    color: AppTheme.crimson.withOpacity(0.08),
+                    color: AppTheme.crimson.withValues(alpha: 0.08),
                     shape: BoxShape.circle,
                     border: Border.all(
-                      color: AppTheme.crimson.withOpacity(0.3),
+                      color: AppTheme.crimson.withValues(alpha: 0.3),
                       width: 2,
                     ),
                   ),
@@ -186,7 +189,7 @@ class _TranscribingScreenState extends State<TranscribingScreen> {
                   child: LinearProgressIndicator(
                     value: (total > 0) ? ((_currentIndex + 1) / total) : 0,
                     minHeight: 10,
-                    backgroundColor: Theme.of(context).colorScheme.outline.withOpacity(0.3),
+                    backgroundColor: Theme.of(context).colorScheme.outline.withValues(alpha: 0.3),
                     valueColor: const AlwaysStoppedAnimation<Color>(AppTheme.crimson),
                   ),
                 ),

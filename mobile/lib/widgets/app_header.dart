@@ -66,7 +66,7 @@ class AppHeader extends StatelessWidget implements PreferredSizeWidget {
                       decoration: BoxDecoration(
                         color: Theme.of(context).scaffoldBackgroundColor,
                         borderRadius: BorderRadius.circular(10),
-                        side: BorderSide(
+                        border: Border.all(
                           color: Theme.of(context).colorScheme.outline,
                         ),
                       ),
@@ -111,8 +111,8 @@ class AppHeader extends StatelessWidget implements PreferredSizeWidget {
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(8),
-                  border: Border.Border.all(
-                    color: AppTheme.crimson.withOpacity(0.3),
+                  border: Border.all(
+                    color: AppTheme.crimson.withValues(alpha: 0.3),
                   ),
                 ),
                 child: const Text(

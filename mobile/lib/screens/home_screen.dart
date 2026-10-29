@@ -172,10 +172,10 @@ class _HomeScreenState extends State<HomeScreen> {
                     Container(
                       padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
-                        color: AppTheme.crimson.withOpacity(0.06),
+                        color: AppTheme.crimson.withValues(alpha: 0.06),
                         borderRadius: BorderRadius.circular(16),
                         border: Border.all(
-                          color: AppTheme.crimson.withOpacity(0.2),
+                          color: AppTheme.crimson.withValues(alpha: 0.2),
                         ),
                       ),
                       child: Column(
@@ -235,7 +235,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                 boxShadow: [
                                   if (_isRecording)
                                     BoxShadow(
-                                      color: Colors.red.withOpacity(0.4),
+                                      color: Colors.red.withValues(alpha: 0.4),
                                       blurRadius: 10,
                                       spreadRadius: 2,
                                     ),
@@ -301,7 +301,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             Container(
                               padding: const EdgeInsets.all(12),
                               decoration: BoxDecoration(
-                                color: AppTheme.crimson.withOpacity(0.08),
+                                color: AppTheme.crimson.withValues(alpha: 0.08),
                                 shape: BoxShape.circle,
                               ),
                               child: const Icon(
@@ -401,8 +401,8 @@ class _HomeScreenState extends State<HomeScreen> {
                                     padding: const EdgeInsets.all(8),
                                     decoration: BoxDecoration(
                                       color: item.isVideo
-                                          ? AppTheme.navy.withOpacity(0.1)
-                                          : AppTheme.crimson.withOpacity(0.1),
+                                          ? AppTheme.navy.withValues(alpha: 0.1)
+                                          : AppTheme.crimson.withValues(alpha: 0.1),
                                       borderRadius: BorderRadius.circular(10),
                                     ),
                                     child: Icon(

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 class AppTheme {
   // Brand Colors (Strictly matching web platform)
@@ -25,7 +24,6 @@ class AppTheme {
       primary: crimson,
       secondary: navy,
       surface: Colors.white,
-      background: parchment,
       outline: ruleColor,
     ),
     appBarTheme: const AppBarTheme(
@@ -35,7 +33,7 @@ class AppTheme {
       centerTitle: true,
       scrolledUnderElevation: 1,
     ),
-    cardTheme: CardTheme(
+    cardTheme: CardThemeData(
       color: Colors.white,
       elevation: 0,
       shape: RoundedRectangleBorder(
@@ -82,7 +80,6 @@ class AppTheme {
       primary: crimson,
       secondary: navy,
       surface: darkSurface,
-      background: darkBackground,
       outline: darkRuleColor,
     ),
     appBarTheme: const AppBarTheme(
@@ -92,7 +89,7 @@ class AppTheme {
       centerTitle: true,
       scrolledUnderElevation: 1,
     ),
-    cardTheme: CardTheme(
+    cardTheme: CardThemeData(
       color: darkSurface,
       elevation: 0,
       shape: RoundedRectangleBorder(

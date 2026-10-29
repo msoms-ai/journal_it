@@ -19,3 +19,20 @@ yarn-debug.log*
 *.docx
 .DS_Store
 Thumbs.db
+
+# Mobile / Flutter
+mobile_test_apps/
+mobile/.dart_tool/
+mobile/.flutter-plugins
+mobile/.flutter-plugins-dependencies
+mobile/.packages
+mobile/build/
+mobile/android/local.properties
+mobile/android/app/src/main/java/io/flutter/plugins/GeneratedPluginRegistrant.java
+mobile/ios/Flutter/Generated.xcconfig
+mobile/ios/Flutter/flutter_export_environment.sh
+mobile/ios/Flutter/ephemeral/
+mobile/ios/Flutter/app.framework
+mobile/ios/Flutter/Flutter.framework
+mobile/ios/Flutter/Flutter.podspec
+mobile/ios/Runner/GeneratedPluginRegistrant.*

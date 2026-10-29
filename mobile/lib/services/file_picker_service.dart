@@ -27,7 +27,7 @@ class FilePickerService {
         if (f.path != null) {
           final file = File(f.path!);
           final size = f.size > 0 ? f.size : (await file.length());
-          final ext = f.extension ?? f.name.split('.').pop() ?? 'mp3';
+          final ext = f.extension ?? (f.name.contains('.') ? f.name.split('.').last : 'mp3');
 
           items.add(
             MediaItem(
