@@ -27,6 +27,9 @@ mobile/.flutter-plugins
 mobile/.flutter-plugins-dependencies
 mobile/.packages
 mobile/build/
+mobile/android/build/
+mobile/android/.gradle/
+mobile/.gradle/
 mobile/android/local.properties
 mobile/android/app/src/main/java/io/flutter/plugins/GeneratedPluginRegistrant.java
 mobile/ios/Flutter/Generated.xcconfig

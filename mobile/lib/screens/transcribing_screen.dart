@@ -10,11 +10,11 @@ class TranscribingScreen extends StatefulWidget {
   final bool isArabic;
 
   const TranscribingScreen({
-    Key? key,
+    super.key,
     required this.files,
     required this.language,
     required this.isArabic,
-  }) : super(key: key);
+  });
 
   @override
   State<TranscribingScreen> createState() => _TranscribingScreenState();

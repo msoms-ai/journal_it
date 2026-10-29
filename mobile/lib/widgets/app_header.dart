@@ -8,12 +8,12 @@ class AppHeader extends StatelessWidget implements PreferredSizeWidget {
   final VoidCallback onToggleTheme;
 
   const AppHeader({
-    Key? key,
+    super.key,
     required this.isArabic,
     required this.isDarkMode,
     required this.onToggleLanguage,
     required this.onToggleTheme,
-  }) : super(key: key);
+  });
 
   @override
   Size get preferredSize => const Size.fromHeight(70);

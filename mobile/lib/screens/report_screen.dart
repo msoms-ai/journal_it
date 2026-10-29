@@ -9,11 +9,11 @@ class ReportScreen extends StatelessWidget {
   final int sourceCount;
 
   const ReportScreen({
-    Key? key,
+    super.key,
     required this.reportText,
     required this.isArabic,
     required this.sourceCount,
-  }) : super(key: key);
+  });
 
   void _copyToClipboard(BuildContext context) {
     Clipboard.setData(ClipboardData(text: reportText));
@@ -27,9 +27,11 @@ class ReportScreen extends StatelessWidget {
   }
 
   void _shareReport() {
-    Share.share(
-      reportText,
-      subject: isArabic ? 'تقرير صحفي — صَحِّف' : 'Official News Wire Report — Journal it',
+    SharePlus.instance.share(
+      ShareParams(
+        text: reportText,
+        subject: isArabic ? 'تقرير صحفي — صَحِّف' : 'Official News Wire Report — Journal it',
+      ),
     );
   }
 

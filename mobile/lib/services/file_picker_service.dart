@@ -9,8 +9,7 @@ class FilePickerService {
   /// Pick multiple audio or video recordings from device storage
   static Future<List<MediaItem>> pickMediaFiles() async {
     try {
-      final result = await FilePicker.platform.pickFiles(
-        allowMultiple: true,
+      final files = await FilePicker.pickFiles(
         type: FileType.custom,
         allowedExtensions: [
           'mp3', 'wav', 'm4a', 'aac', 'ogg', 'flac', // Audio
@@ -18,22 +17,22 @@ class FilePickerService {
         ],
       );
 
-      if (result == null || result.files.isEmpty) {
+      if (files.isEmpty) {
         return [];
       }
 
       final List<MediaItem> items = [];
-      for (final f in result.files) {
-        if (f.path != null) {
-          final file = File(f.path!);
-          final size = f.size > 0 ? f.size : (await file.length());
+      for (final f in files) {
+        final filePath = f.path ?? (f.uri.scheme == 'file' ? f.uri.toFilePath() : null);
+        if (filePath != null) {
+          final size = f.lengthSync() ?? (await f.length()) ?? (await File(filePath).length());
           final ext = f.extension ?? (f.name.contains('.') ? f.name.split('.').last : 'mp3');
 
           items.add(
             MediaItem(
               id: _uuid.v4(),
               name: f.name,
-              path: f.path!,
+              path: filePath,
               size: size,
               extension: ext,
             ),

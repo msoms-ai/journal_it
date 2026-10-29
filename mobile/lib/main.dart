@@ -11,7 +11,7 @@ void main() {
 }
 
 class SahhefApp extends StatefulWidget {
-  const SahhefApp({Key? key}) : super(key: key);
+  const SahhefApp({super.key});
 
   @override
   State<SahhefApp> createState() => _SahhefAppState();
