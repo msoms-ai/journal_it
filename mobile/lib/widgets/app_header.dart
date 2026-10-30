@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../config/app_theme.dart';
+import '../screens/about_screen.dart';
 
 class AppHeader extends StatelessWidget implements PreferredSizeWidget {
   final bool isArabic;
@@ -106,22 +107,41 @@ class AppHeader extends StatelessWidget implements PreferredSizeWidget {
                 ),
               ),
 
-              // Right: MSOMS.AI tag
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(
-                    color: AppTheme.crimson.withValues(alpha: 0.3),
+              // Right: MSOMS.AI tag (Clickable to AboutScreen)
+              InkWell(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => AboutScreen(isArabic: isArabic),
+                    ),
+                  );
+                },
+                borderRadius: BorderRadius.circular(8),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                  decoration: BoxDecoration(
+                    color: AppTheme.crimson.withValues(alpha: 0.06),
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(
+                      color: AppTheme.crimson.withValues(alpha: 0.35),
+                    ),
                   ),
-                ),
-                child: const Text(
-                  'MSOMS.AI',
-                  style: TextStyle(
-                    fontSize: 11,
-                    fontWeight: FontWeight.w900,
-                    letterSpacing: 0.8,
-                    color: AppTheme.crimson,
+                  child: const Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.info_outline, size: 13, color: AppTheme.crimson),
+                      SizedBox(width: 4),
+                      Text(
+                        'MSOMS.AI',
+                        style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w900,
+                          letterSpacing: 0.8,
+                          color: AppTheme.crimson,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ),

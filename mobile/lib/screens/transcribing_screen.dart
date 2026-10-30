@@ -2,18 +2,21 @@ import 'package:flutter/material.dart';
 import '../config/app_theme.dart';
 import '../models/media_item.dart';
 import '../services/api_service.dart';
+import '../services/stats_service.dart';
 import 'review_screen.dart';
 
 class TranscribingScreen extends StatefulWidget {
   final List<MediaItem> files;
   final String language;
   final bool isArabic;
+  final VoidCallback? onResetSession;
 
   const TranscribingScreen({
     super.key,
     required this.files,
     required this.language,
     required this.isArabic,
+    this.onResetSession,
   });
 
   @override
@@ -72,17 +75,25 @@ class _TranscribingScreenState extends State<TranscribingScreen> {
     }
 
     if (!_isCancelled && mounted) {
+      final completedCount = widget.files.where((f) => f.status == MediaStatus.completed).length;
+      if (completedCount > 0) {
+        await StatsService.incrementFilesProcessed(completedCount);
+      }
+
       // Proceed to Review Screen
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-          builder: (_) => ReviewScreen(
-            files: widget.files,
-            language: widget.language,
-            isArabic: widget.isArabic,
+      if (mounted) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (_) => ReviewScreen(
+              files: widget.files,
+              language: widget.language,
+              isArabic: widget.isArabic,
+              onResetSession: widget.onResetSession,
+            ),
           ),
-        ),
-      );
+        );
+      }
     }
   }
 

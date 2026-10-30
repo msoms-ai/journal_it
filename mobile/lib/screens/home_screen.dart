@@ -1,10 +1,14 @@
 import 'dart:async';
+import 'dart:io';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 import 'package:uuid/uuid.dart';
 import '../config/app_theme.dart';
 import '../models/media_item.dart';
 import '../services/file_picker_service.dart';
 import '../services/audio_recorder_service.dart';
+import '../services/stats_service.dart';
 import 'transcribing_screen.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -31,12 +35,83 @@ class _HomeScreenState extends State<HomeScreen> {
   bool _isRecording = false;
   int _recordingSeconds = 0;
   Timer? _recordingTimer;
+  StreamSubscription? _intentSub;
+  AppStats _stats = const AppStats(filesProcessed: 0, reportsGenerated: 0);
+
+  @override
+  void initState() {
+    super.initState();
+    _loadStats();
+    _initShareIntent();
+  }
 
   @override
   void dispose() {
+    _intentSub?.cancel();
     _recordingTimer?.cancel();
     _recorder.dispose();
     super.dispose();
+  }
+
+  Future<void> _loadStats() async {
+    final s = await StatsService.getStats();
+    if (mounted) {
+      setState(() {
+        _stats = s;
+      });
+    }
+  }
+
+  void _initShareIntent() {
+    // Listen to media sharing while app is in memory
+    _intentSub = ReceiveSharingIntent.instance.getMediaStream().listen((List<SharedMediaFile> value) {
+      if (value.isNotEmpty) {
+        _handleSharedMedia(value);
+      }
+    }, onError: (err) {
+      debugPrint('getMediaStream error: $err');
+    });
+
+    // Get media sharing when app is launched from cold start
+    ReceiveSharingIntent.instance.getInitialMedia().then((List<SharedMediaFile> value) {
+      if (value.isNotEmpty) {
+        _handleSharedMedia(value);
+        ReceiveSharingIntent.instance.reset();
+      }
+    });
+  }
+
+  Future<void> _handleSharedMedia(List<SharedMediaFile> sharedFiles) async {
+    final List<MediaItem> newItems = [];
+    for (final sf in sharedFiles) {
+      final file = File(sf.path);
+      if (await file.exists()) {
+        final fileName = file.uri.pathSegments.isNotEmpty
+            ? file.uri.pathSegments.last
+            : 'shared_media';
+        final ext = fileName.contains('.') ? fileName.split('.').last.toLowerCase() : 'mp4';
+        final size = await file.length();
+        newItems.add(
+          MediaItem(
+            id: const Uuid().v4(),
+            name: fileName,
+            path: sf.path,
+            size: size,
+            extension: ext,
+          ),
+        );
+      }
+    }
+    if (newItems.isNotEmpty && mounted) {
+      setState(() {
+        _files.addAll(newItems);
+      });
+      _showSnackbar(
+        widget.isArabic
+            ? 'تم استلام ${newItems.length} ملفات عبر المشاركة'
+            : 'Received ${newItems.length} shared file(s)',
+      );
+    }
   }
 
   Future<void> _pickFiles() async {
@@ -114,10 +189,33 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
+  Future<void> _resetSession() async {
+    for (final item in _files) {
+      try {
+        final f = File(item.path);
+        if (await f.exists()) {
+          if (item.path.contains('interview_') ||
+              item.path.contains('cache') ||
+              item.path.contains('temp')) {
+            await f.delete();
+          }
+        }
+      } catch (_) {}
+    }
+    try {
+      await FilePicker.clearTemporaryFiles();
+    } catch (_) {}
+
+    if (mounted) {
+      setState(() {
+        _files.clear();
+      });
+      _loadStats();
+    }
+  }
+
   void _clearAll() {
-    setState(() {
-      _files.clear();
-    });
+    _resetSession();
   }
 
   void _startJournalIt() {
@@ -130,12 +228,17 @@ class _HomeScreenState extends State<HomeScreen> {
       context,
       MaterialPageRoute(
         builder: (_) => TranscribingScreen(
-          files: _files,
+          files: List.from(_files),
           language: widget.isArabic ? 'ar' : 'en',
           isArabic: widget.isArabic,
+          onResetSession: _resetSession,
         ),
       ),
-    );
+    ).then((_) {
+      if (mounted) {
+        _loadStats();
+      }
+    });
   }
 
   void _showSnackbar(String msg) {
@@ -475,6 +578,49 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
 
+            // Small Statistics Banner (Files Processed, Reports Generated, App Version)
+            Container(
+              margin: const EdgeInsets.fromLTRB(16, 6, 16, 8),
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+              decoration: BoxDecoration(
+                color: Theme.of(context).cardColor,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.6),
+                ),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  _buildStatItem(
+                    title: t ? 'ملفات مُفرغة' : 'Transcribed',
+                    value: '${_stats.filesProcessed}',
+                    icon: Icons.audio_file_outlined,
+                  ),
+                  Container(
+                    width: 1,
+                    height: 22,
+                    color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.7),
+                  ),
+                  _buildStatItem(
+                    title: t ? 'تقارير مُصاغة' : 'Reports',
+                    value: '${_stats.reportsGenerated}',
+                    icon: Icons.article_outlined,
+                  ),
+                  Container(
+                    width: 1,
+                    height: 22,
+                    color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.7),
+                  ),
+                  _buildStatItem(
+                    title: t ? 'الإصدار' : 'Version',
+                    value: 'v${_stats.appVersion}',
+                    icon: Icons.verified_outlined,
+                  ),
+                ],
+              ),
+            ),
+
             // Sticky Bottom Button: "Journal it !!"
             Container(
               padding: const EdgeInsets.all(16),
@@ -509,6 +655,43 @@ class _HomeScreenState extends State<HomeScreen> {
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildStatItem({
+    required String title,
+    required String value,
+    required IconData icon,
+  }) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(icon, size: 16, color: AppTheme.crimson),
+        const SizedBox(width: 6),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              value,
+              style: const TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.bold,
+                color: AppTheme.crimson,
+                height: 1.1,
+              ),
+            ),
+            Text(
+              title,
+              style: TextStyle(
+                fontSize: 9.5,
+                color: Theme.of(context).textTheme.bodySmall?.color,
+                height: 1.1,
+              ),
+            ),
+          ],
+        ),
+      ],
     );
   }
 }

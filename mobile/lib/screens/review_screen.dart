@@ -3,18 +3,21 @@ import 'package:flutter/services.dart';
 import '../config/app_theme.dart';
 import '../models/media_item.dart';
 import '../services/api_service.dart';
+import '../services/stats_service.dart';
 import 'report_screen.dart';
 
 class ReviewScreen extends StatefulWidget {
   final List<MediaItem> files;
   final String language;
   final bool isArabic;
+  final VoidCallback? onResetSession;
 
   const ReviewScreen({
     super.key,
     required this.files,
     required this.language,
     required this.isArabic,
+    this.onResetSession,
   });
 
   @override
@@ -75,6 +78,8 @@ class _ReviewScreenState extends State<ReviewScreen> {
         language: widget.language,
       );
 
+      await StatsService.incrementReportsGenerated();
+
       if (!mounted) return;
       setState(() {
         _isSynthesizing = false;
@@ -87,6 +92,8 @@ class _ReviewScreenState extends State<ReviewScreen> {
             reportText: report,
             isArabic: widget.isArabic,
             sourceCount: selectedTranscripts.length,
+            files: widget.files,
+            onResetSession: widget.onResetSession,
           ),
         ),
       );

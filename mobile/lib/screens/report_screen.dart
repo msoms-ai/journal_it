@@ -1,18 +1,25 @@
+import 'dart:io';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:share_plus/share_plus.dart';
 import '../config/app_theme.dart';
+import '../models/media_item.dart';
 
 class ReportScreen extends StatelessWidget {
   final String reportText;
   final bool isArabic;
   final int sourceCount;
+  final List<MediaItem>? files;
+  final VoidCallback? onResetSession;
 
   const ReportScreen({
     super.key,
     required this.reportText,
     required this.isArabic,
     required this.sourceCount,
+    this.files,
+    this.onResetSession,
   });
 
   void _copyToClipboard(BuildContext context) {
@@ -35,8 +42,33 @@ class ReportScreen extends StatelessWidget {
     );
   }
 
-  void _startNewSession(BuildContext context) {
-    Navigator.of(context).popUntil((route) => route.isFirst);
+  Future<void> _startNewSession(BuildContext context) async {
+    // 1. Delete temporary recording/cache files
+    if (files != null) {
+      for (final item in files!) {
+        try {
+          final f = File(item.path);
+          if (await f.exists()) {
+            if (item.path.contains('interview_') ||
+                item.path.contains('cache') ||
+                item.path.contains('temp')) {
+              await f.delete();
+            }
+          }
+        } catch (_) {}
+      }
+    }
+
+    // 2. Clear FilePicker temporary directory cache
+    try {
+      await FilePicker.clearTemporaryFiles();
+    } catch (_) {}
+
+    // 3. Pop back to HomeScreen & reset files list
+    if (context.mounted) {
+      Navigator.of(context).popUntil((route) => route.isFirst);
+      onResetSession?.call();
+    }
   }
 
   @override
