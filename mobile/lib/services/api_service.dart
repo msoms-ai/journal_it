@@ -37,9 +37,9 @@ class ApiService {
       );
 
       if (response.statusCode == 200 && response.data != null) {
-        final text = response.data['text'];
-        if (text is String && text.trim().isNotEmpty) {
-          return text.trim();
+        final rawText = response.data['transcript'] ?? response.data['text'];
+        if (rawText is String && rawText.trim().isNotEmpty) {
+          return rawText.trim();
         }
         throw Exception('الخادم لم يُرجع نصاً مفرغاً');
       } else {
@@ -56,6 +56,8 @@ class ApiService {
       } else {
         throw Exception('فشل الاتصال بخادم المنصة: ${e.message}');
       }
+    } on Exception {
+      rethrow;
     } catch (e) {
       throw Exception('خطأ غير متوقع: $e');
     }
@@ -76,9 +78,11 @@ class ApiService {
       );
 
       if (response.statusCode == 200 && response.data != null) {
-        final report = response.data['report'];
-        if (report is String && report.trim().isNotEmpty) {
-          return report.trim();
+        final rawReport = response.data['report'] ??
+            response.data['report_text'] ??
+            response.data['body_markdown'];
+        if (rawReport is String && rawReport.trim().isNotEmpty) {
+          return rawReport.trim();
         }
         throw Exception('الخادم لم يُرجع تقريراً صياغياً');
       } else {
@@ -94,6 +98,8 @@ class ApiService {
       } else {
         throw Exception('فشل في الوصول للخادم: ${e.message}');
       }
+    } on Exception {
+      rethrow;
     } catch (e) {
       throw Exception('خطأ: $e');
     }

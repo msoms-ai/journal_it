@@ -105,6 +105,7 @@ Return ONLY a valid JSON object with this exact structure:
     const finalReport = cleanedParas.join('\n\n');
 
     return NextResponse.json({
+      report: finalReport,
       report_text: finalReport,
       body_markdown: finalReport,
       headline: '',

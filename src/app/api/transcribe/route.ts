@@ -130,6 +130,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({
       status: 'completed',
       transcript,
+      text: transcript,
       filename: file.name,
     });
   } catch (error: any) {
