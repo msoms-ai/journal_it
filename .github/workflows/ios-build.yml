@@ -1,0 +1,58 @@
+name: Build iOS Application (Sahhef)
+
+on:
+  workflow_dispatch: # Allows manual trigger from GitHub web UI
+  push:
+    branches:
+      - main
+    paths:
+      - 'mobile/**'
+      - '.github/workflows/ios-build.yml'
+
+jobs:
+  build-ios:
+    name: Build iOS IPA
+    runs-on: macos-14 # Fast Apple Silicon (M1/M2) runner with Xcode 15+ pre-installed
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Flutter SDK
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+          cache: true
+
+      - name: Verify Flutter Installation
+        run: flutter --version
+
+      - name: Install Flutter Dependencies
+        run: |
+          cd mobile
+          flutter pub get
+
+      - name: Install CocoaPods
+        run: |
+          cd mobile/ios
+          pod install --repo-update
+
+      - name: Build iOS Application (No Code-Sign)
+        run: |
+          cd mobile
+          flutter build ios --release --no-codesign
+
+      - name: Package Runner.app into Installable .IPA
+        run: |
+          cd mobile/build/ios/iphoneos
+          mkdir -p Payload
+          cp -r Runner.app Payload/
+          zip -r Sahhef-iOS-Release.ipa Payload
+          echo "IPA package created successfully."
+
+      - name: Upload IPA as GitHub Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Sahhef-iOS-IPA
+          path: mobile/build/ios/iphoneos/Sahhef-iOS-Release.ipa
+          retention-days: 14
